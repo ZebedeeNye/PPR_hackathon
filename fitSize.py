@@ -3,19 +3,19 @@ import os
 
 
 def find_matches(
-    operator_name,
+    operator_index,
     operators_path="data/requirements_cleaned.xlsx",
     buildings_path="data/Data Workshop office spreadsheet.xlsx",
     output_path="results/matched_buildings.xlsx",
 ):
     """
-    Finds building matches for a given operator based on size requirements
-    and saves them to a fixed Excel file for use in subsequent processing.
+    Finds building matches for a given operator (by row index)
+    based on size requirements and saves them to a fixed Excel file.
 
     Parameters
     ----------
-    operator_name : str
-        The name of the operator to match.
+    operator_index : int
+        The row index of the operator in the requirements Excel file.
     operators_path : str, optional
         Path to the operators Excel file.
     buildings_path : str, optional
@@ -36,17 +36,18 @@ def find_matches(
     # Ensure output directory exists
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
-    # Find the operator row
-    op_rows = operators[operators["Operator"].astype(str).str.lower() == operator_name.lower()]
-    if op_rows.empty:
-        print(f"No operator found with name '{operator_name}'.")
+    # Check if index is valid
+    if operator_index < 0 or operator_index >= len(operators):
+        print(f"Invalid operator index: {operator_index}")
         return pd.DataFrame()
 
-    op = op_rows.iloc[0]
+    # Select operator by index
+    op = operators.iloc[operator_index]
+    operator_name = op["Operator"]
     min_size = op["MinSize"]
     max_size = op["MaxSize"]
 
-    print(f"\nSelected Operator: {operator_name}")
+    print(f"\nSelected Operator (row {operator_index}): {operator_name}")
     print(f"Required Size Range: {min_size} – {max_size} sq ft")
 
     # Convert building sizes to numeric
@@ -72,5 +73,9 @@ def find_matches(
 
 # Example usage
 if __name__ == "__main__":
-    operator = input("Enter operator name: ").strip()
-    find_matches(operator)
+    operators = pd.read_excel("data/requirements_cleaned.xlsx")
+    print("Available operators:\n")
+    print(operators[["Operator", "MinSize", "MaxSize"]].reset_index())
+
+    index = int(input("\nEnter the row number of the operator to match: "))
+    find_matches(index)
