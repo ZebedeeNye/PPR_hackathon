@@ -1,8 +1,12 @@
 import pandas as pd
+import os
 
 # --- Load Excel files ---
 operators = pd.read_excel("data/requirements_cleaned.xlsx")  
 buildings = pd.read_excel("data/Data Workshop office spreadsheet.xlsx")
+
+# --- Ensure output directory exists ---
+os.makedirs("results", exist_ok=True)
 
 # --- Show available operators ---
 print("Available operators:\n")
@@ -33,9 +37,13 @@ matches = buildings[
 if matches.empty:
     print("\n❌ No matching buildings found for this operator.")
 else:
-    print(f"\n✅ Found {len(matches)} matching buildings:\n")
-    print(matches[["city", "post code", "size"]])
+    print(f"\n✅ Found {len(matches)} matching buildings.")
 
-    output_file = f"Matches_for_{operator_name}.xlsx"
+    # Choose output folder and filename
+    safe_name = str(operator_name).replace("/", "_").replace("\\", "_").strip()
+    output_file = os.path.join("results", f"Matches_for_{safe_name}.xlsx")
+
+    # Save results to Excel
     matches.to_excel(output_file, index=False)
+
     print(f"\n💾 Results saved to: {output_file}")
