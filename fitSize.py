@@ -2,9 +2,15 @@ import pandas as pd
 import os
 
 
-def find_matches(operator_name, operators_path="data/requirements_cleaned.xlsx", buildings_path="data/Data Workshop office spreadsheet.xlsx"):
+def find_matches(
+    operator_name,
+    operators_path="data/requirements_cleaned.xlsx",
+    buildings_path="data/Data Workshop office spreadsheet.xlsx",
+    output_path="results/matched_buildings.xlsx",
+):
     """
-    Finds building matches for a given operator based on size requirements.
+    Finds building matches for a given operator based on size requirements
+    and saves them to a fixed Excel file for use in subsequent processing.
 
     Parameters
     ----------
@@ -14,6 +20,8 @@ def find_matches(operator_name, operators_path="data/requirements_cleaned.xlsx",
         Path to the operators Excel file.
     buildings_path : str, optional
         Path to the buildings Excel file.
+    output_path : str, optional
+        Path where the matched buildings Excel file will be saved.
 
     Returns
     -------
@@ -26,7 +34,7 @@ def find_matches(operator_name, operators_path="data/requirements_cleaned.xlsx",
     buildings = pd.read_excel(buildings_path)
 
     # Ensure output directory exists
-    os.makedirs("results", exist_ok=True)
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
     # Find the operator row
     op_rows = operators[operators["Operator"].astype(str).str.lower() == operator_name.lower()]
@@ -50,19 +58,19 @@ def find_matches(operator_name, operators_path="data/requirements_cleaned.xlsx",
         (buildings["size"] <= max_size)
     ]
 
+    # Output results
     if matches.empty:
         print("No matching buildings found.")
-    else:
-        print(f"Found {len(matches)} matching buildings.")
-        safe_name = str(operator_name).replace("/", "_").replace("\\", "_").strip()
-        output_file = os.path.join("results", f"Matches_for_{safe_name}.xlsx")
-        matches.to_excel(output_file, index=False)
-        print(f"Results saved to: {output_file}")
+        return pd.DataFrame()
+
+    print(f"Found {len(matches)} matching buildings.")
+    matches.to_excel(output_path, index=False)
+    print(f"Results saved to: {output_path}")
 
     return matches
 
 
-# Example usage:
+# Example usage
 if __name__ == "__main__":
     operator = input("Enter operator name: ").strip()
     find_matches(operator)

@@ -7,5 +7,5 @@ buildings = pd.read_excel("data/Data Workshop office spreadsheet.xlsx")
 
 matches = find_matches("Co-op, Sainsuburys, Tesco, Asda, Morrisons")
 
-area = find_area()
+# area = find_area()
 
